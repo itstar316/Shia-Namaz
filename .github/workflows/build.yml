@@ -18,6 +18,8 @@ jobs:
           java-version: 17
       - name: Build
         run: unzip -o -q shia-namaz-offline.zip -d src && bash src/build.sh
+        env:
+          KS_PASS: ${{ secrets.KS_PASS }}
       - uses: actions/upload-artifact@v4
         with:
           name: ShiaNamaz-APK
@@ -26,3 +28,4 @@ jobs:
         run: gh release create "v1.0.${{ github.run_number }}" ShiaNamaz.apk --title "Shia Namaz 1.0.${{ github.run_number }}" --notes "Fully offline build"
         env:
           GH_TOKEN: ${{ github.token }}
+  
