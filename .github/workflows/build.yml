@@ -1,0 +1,28 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build
+        run: unzip -o -q shia-namaz-offline.zip -d src && bash src/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShiaNamaz-APK
+          path: ShiaNamaz.apk
+      - name: Publish release
+        run: gh release create "v1.0.${{ github.run_number }}" ShiaNamaz.apk --title "Shia Namaz 1.0.${{ github.run_number }}" --notes "Fully offline build"
+        env:
+          GH_TOKEN: ${{ github.token }}
