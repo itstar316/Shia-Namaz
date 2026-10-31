@@ -1,38 +1,18 @@
 workflows:
-  k2-digitizer-apk:
-    name: K2 Digitizer APK
+  android:
+    name: Shia Namaz APK
     instance_type: mac_mini_m2
-    max_build_duration: 60
+    max_build_duration: 45
     environment:
+      groups:
+        - signing
+      node: 20
       java: 17
     triggering:
       events:
         - push
-      branch_patterns:
-        - pattern: main
-          include: true
     scripts:
-      - name: Unzip the project
-        script: |
-          ZIP_FILE=$(ls *.zip | head -n 1)
-          echo "Using $ZIP_FILE"
-          mkdir -p src
-          unzip -q -o "$ZIP_FILE" -d src
-          # Works whether the zip has the files at the top or inside one folder
-          PROJECT_DIR=$(dirname "$(find src -name settings.gradle.kts | head -n 1)")
-          echo "Project found in $PROJECT_DIR"
-          echo "PROJECT_DIR=$CM_BUILD_DIR/$PROJECT_DIR" >> $CM_ENV
-      - name: Point Gradle at the Android SDK
-        script: echo "sdk.dir=$ANDROID_SDK_ROOT" > "$PROJECT_DIR/local.properties"
-      - name: Download Gradle 9.3.1
-        script: |
-          curl -sSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-9.3.1-bin.zip
-          unzip -q /tmp/gradle.zip -d "$HOME/gradle-dist"
-      - name: Build the APK
-        script: |
-          cd "$PROJECT_DIR"
-          "$HOME/gradle-dist/gradle-9.3.1/bin/gradle" --no-daemon --stacktrace :app:assembleDebug
-          mkdir -p "$CM_BUILD_DIR/apk-output"
-          find app/build/outputs/apk -name "*.apk" -exec cp {} "$CM_BUILD_DIR/apk-output/" \;
+      - name: Build APK
+        script: unzip -o -q shia-namaz-offline.zip -d src && bash src/build.sh
     artifacts:
-      - apk-output/*.apk
+      - ShiaNamaz.apk
